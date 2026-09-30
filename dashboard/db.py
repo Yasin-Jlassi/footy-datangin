@@ -15,9 +15,14 @@ CACHE_TTL = config.get("dashboard", {}).get("cache_ttl", 3600)
 
 @st.cache_resource
 def get_connection():
-    db_url = os.environ.get("DATABASE_URL")
+    # Streamlit Cloud uses st.secrets; local/CI uses env var
+    db_url = None
+    try:
+        db_url = st.secrets["DATABASE_URL"]
+    except (KeyError, FileNotFoundError):
+        db_url = os.environ.get("DATABASE_URL")
     if not db_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
+        raise ValueError("DATABASE_URL not found in st.secrets or environment variables")
     return psycopg2.connect(db_url)
 
 @st.cache_data(ttl=CACHE_TTL)

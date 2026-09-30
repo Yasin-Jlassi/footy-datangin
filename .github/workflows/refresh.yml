@@ -8,6 +8,9 @@ on:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SOCCERDATA_CACHE_DIR: /tmp/soccerdata_cache
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,17 +23,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify DATABASE_URL
+        run: python -c "import os; dsn=os.environ.get('DATABASE_URL',''); print(f'DATABASE_URL set: {bool(dsn)}, length: {len(dsn)}')"
+
       - name: Run scrape
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SOCCERDATA_CACHE_DIR: /tmp/soccerdata_cache
         run: python scraper/run_scrape.py
 
       - name: Run modeling
         if: always()
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           python pipeline/features.py
           python pipeline/model_similarity.py

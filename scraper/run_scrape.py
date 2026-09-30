@@ -18,7 +18,12 @@ from pipeline.model_similarity import run_similarity
 from pipeline.validate import run_validation
 from scraper.fetch_fbref import fetch_fbref_season
 
-DB_DSN = os.environ["DATABASE_URL"]
+
+def get_db_dsn():
+    dsn = os.environ.get("DATABASE_URL", "")
+    if not dsn:
+        raise ValueError("DATABASE_URL environment variable is not set")
+    return dsn
 
 # Load config for defaults
 try:
@@ -96,7 +101,7 @@ def main():
 
     seasons = args.seasons or BACKFILL_SEASONS
 
-    conn = psycopg2.connect(DB_DSN)
+    conn = psycopg2.connect(get_db_dsn())
     run_id = log_run_start(conn)
 
     # ── Step 1: Scrape ───────────────────────────────────────────────

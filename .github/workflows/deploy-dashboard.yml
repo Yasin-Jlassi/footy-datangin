@@ -1,0 +1,15 @@
+name: Deploy Dashboard
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dashboard/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Placeholder
+        run: echo 'Deploy to Streamlit Cloud is handled via Streamlit Cloud GitHub integration'

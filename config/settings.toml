@@ -1,0 +1,125 @@
+# =====================================================================
+# Footy DataNgin — Central Configuration
+# =====================================================================
+# DB creds live in env var DATABASE_URL (set in Supabase / deployment).
+# Everything else is here so nothing is hardcoded across modules.
+
+[scraper]
+# soccerdata league keys
+leagues = [
+    "ENG-Premier League",
+    "ESP-La Liga",
+    "GER-Bundesliga",
+    "ITA-Serie A",
+    "FRA-Ligue 1",
+]
+# soccerdata season codes for backfill (last 3 completed seasons)
+backfill_seasons = ["2223", "2324", "2425"]
+# stat types pulled from FBref (soccerdata stat_type values)
+stat_types = [
+    "standard", "shooting", "passing", "defense",
+    "possession", "misc", "keepers", "keepersadv",
+]
+# Minimum minutes to include a player in feature/similarity calculations
+min_minutes = 450
+
+[positions]
+# Canonical position groups and how raw FBref position strings map to them.
+groups = ["GK", "CB", "FB", "CM", "W", "ST"]
+
+[positions.map]
+GK     = ["GK"]
+CB     = ["DF-CB", "CB"]
+FB     = ["DF-FB", "FB", "WB", "RB", "LB", "DF"]
+CM     = ["MF", "CM", "DM", "AM", "MF-DM", "MF-AM"]
+W      = ["FW-W", "W", "WM", "LW", "RW", "MF-FW"]
+ST     = ["FW", "ST", "CF", "FW-ST"]
+
+# ── Per-position feature definitions ────────────────────────────────
+# Each key is a feature name written to the feature_* table columns.
+# The value describes how features.py computes it from player_season_stats.
+#   "per90:<col>"       → col / minutes * 90
+#   "ratio:<num>:<den>" → num / den
+#   "raw:<col>"         → use column value directly
+
+[features.GK]
+save_pct                    = "ratio:gk_saves:gk_shots_on_target_against"
+ga_per90                    = "per90:gk_goals_against"
+psxg_diff_per90             = "per90_diff:gk_psxg:gk_goals_against"  # (psxg - ga) / min * 90
+crosses_stopped_pct         = "ratio:gk_crosses_stopped:gk_crosses_faced"
+def_actions_outside_pen_per90 = "per90:gk_def_actions_outside_pen"
+pass_pct                    = "ratio:passes_completed:passes_attempted"
+long_pass_cmp_pct           = "ratio:passes_long_completed:passes_long_attempted"
+clean_sheet_pct             = "ratio:gk_clean_sheets:games_played"
+
+[features.CB]
+tackles_per90               = "per90:tackles"
+tackles_won_pct             = "ratio:tackles_won:tackles"
+interceptions_per90         = "per90:interceptions"
+clearances_per90            = "per90:clearances"
+blocks_per90                = "per90:blocks"
+aerials_won_pct             = "ratio:aerials_won:aerials_won+aerials_lost"
+aerials_won_per90           = "per90:aerials_won"
+pass_pct                    = "ratio:passes_completed:passes_attempted"
+progressive_passes_per90    = "per90:progressive_passes"
+progressive_carries_per90   = "per90:progressive_carries"
+
+[features.FB]
+tackles_per90               = "per90:tackles"
+interceptions_per90         = "per90:interceptions"
+progressive_carries_per90   = "per90:progressive_carries"
+carries_into_final_third_per90 = "per90:carries_into_final_third"
+crosses_into_pen_area_per90 = "per90:crosses_into_penalty_area"
+key_passes_per90            = "per90:key_passes"
+assists_per90               = "per90:assists"
+pass_pct                    = "ratio:passes_completed:passes_attempted"
+take_ons_won_per90          = "per90:take_ons_won"
+take_ons_won_pct            = "ratio:take_ons_won:take_ons_attempted"
+
+[features.CM]
+pass_pct                    = "ratio:passes_completed:passes_attempted"
+progressive_passes_per90    = "per90:progressive_passes"
+key_passes_per90            = "per90:key_passes"
+passes_into_final_third_per90 = "per90:passes_into_final_third"
+xag_per90                   = "per90:xag"
+tackles_per90               = "per90:tackles"
+interceptions_per90         = "per90:interceptions"
+progressive_carries_per90   = "per90:progressive_carries"
+recoveries_per90            = "per90:recoveries"
+goals_per90                 = "per90:goals"
+
+[features.W]
+goals_per90                 = "per90:goals"
+npxg_per90                  = "per90:npxg"
+shots_per90                 = "per90:shots"
+shots_on_target_pct         = "ratio:shots_on_target:shots"
+assists_per90               = "per90:assists"
+xag_per90                   = "per90:xag"
+key_passes_per90            = "per90:key_passes"
+take_ons_won_per90          = "per90:take_ons_won"
+take_ons_won_pct            = "ratio:take_ons_won:take_ons_attempted"
+progressive_carries_per90   = "per90:progressive_carries"
+
+[features.ST]
+goals_per90                 = "per90:goals"
+npxg_per90                  = "per90:npxg"
+shots_per90                 = "per90:shots"
+shots_on_target_pct         = "ratio:shots_on_target:shots"
+goals_per_shot              = "ratio:goals:shots"
+assists_per90               = "per90:assists"
+xag_per90                   = "per90:xag"
+aerials_won_per90           = "per90:aerials_won"
+aerials_won_pct             = "ratio:aerials_won:aerials_won+aerials_lost"
+touches_att_pen_area_per90  = "per90:touches_att_pen_area"
+
+[model]
+# PCA: retain this fraction of total explained variance
+pca_variance_threshold = 0.90
+# Similarity: top-N results stored/displayed
+top_n_similar = 20
+
+[dashboard]
+# Number of similar players shown in search view
+search_top_n = 10
+# Cache TTL for st.cache_data (seconds)
+cache_ttl = 3600

@@ -1,8 +1,9 @@
 # =====================================================================
 # Footy DataNgin — Dashboard only (used by Streamlit Cloud)
+# No version pins — let pip resolve for the platform's Python version
 # =====================================================================
-pandas==2.2.2
-psycopg2-binary==2.9.9
-tomli==2.0.1
-streamlit==1.36.0
-plotly==5.22.0
+pandas
+psycopg2-binary
+tomli
+streamlit
+plotly

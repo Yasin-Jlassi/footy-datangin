@@ -1,22 +1,8 @@
 # =====================================================================
-# Footy DataNgin — All dependencies
+# Footy DataNgin — Dashboard only (used by Streamlit Cloud)
 # =====================================================================
-
-# ── Element 1: Ingestion ─────────────────────────────────────────────
-soccerdata==1.8.5           # FBref parsing + built-in local cache
-statsbombpy==1.22.0         # StatsBomb Open Data client
-requests==2.32.3
-
-# ── Shared: data + DB ────────────────────────────────────────────────
 pandas==2.2.2
-psycopg2-binary==2.9.9      # Postgres driver (Supabase/Neon)
-tomli==2.0.1                 # TOML config reader (Python <3.11 compat)
-
-# ── Element 3: Modeling ──────────────────────────────────────────────
-scikit-learn==1.5.1          # PCA, silhouette score, KMeans
-scipy==1.14.0                # cosine similarity, rankdata
-numpy==1.26.4
-
-# ── Element 4: Dashboard ─────────────────────────────────────────────
+psycopg2-binary==2.9.9
+tomli==2.0.1
 streamlit==1.36.0
 plotly==5.22.0

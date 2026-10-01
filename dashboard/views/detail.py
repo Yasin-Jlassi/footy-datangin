@@ -26,7 +26,9 @@ def render():
         player = get_player(player_id)
         
         if not player:
-            st.error("Player not found.")
+            st.session_state.pop('detail_player_id', None)
+            st.session_state.pop('selected_player_id', None)
+            st.info("Please search and select a player above.")
             return
             
         st.header(f"{player['full_name']} - Stats")

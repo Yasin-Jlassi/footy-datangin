@@ -1,9 +1,10 @@
 # =====================================================================
 # Footy DataNgin — Dashboard only (used by Streamlit Cloud)
-# No version pins — let pip resolve for the platform's Python version
+# No version pins except pillow (needs >=11 for Python 3.14 wheels)
 # =====================================================================
 pandas
 psycopg2-binary
 tomli
 streamlit
 plotly
+pillow>=11.1

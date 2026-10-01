@@ -191,5 +191,5 @@ if __name__ == "__main__":
     DB_DSN = os.environ["DATABASE_URL"]
     conn = psycopg2.connect(DB_DSN)
     written = run_features(conn)
-    print(f"✓ {written} feature rows written")
+    print(f"[OK] {written} feature rows written")
     conn.close()

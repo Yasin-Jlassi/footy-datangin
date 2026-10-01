@@ -123,5 +123,5 @@ if __name__ == "__main__":
     DB_DSN = os.environ["DATABASE_URL"]
     conn = psycopg2.connect(DB_DSN)
     written = run_similarity(conn)
-    print(f"✓ {written} similarity pairs written")
+    print(f"[OK] {written} similarity pairs written")
     conn.close()

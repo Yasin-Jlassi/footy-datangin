@@ -45,22 +45,34 @@ def compute_per90(row: dict) -> dict:
 
 def upsert_player_master(conn, player_row: dict) -> int:
     """
-    Matches on (full_name, birth_date, nationality) per idx_player_master_dedup.
-    fbref_id is the anchor source ID, kept unique.
+    Matches on fbref_id (source ID) first, then on (full_name, birth_date, nationality).
     Returns player_id.
     """
-    sql = """
-        INSERT INTO player_master
-            (fbref_id, full_name, birth_date, nationality, primary_position, position_group)
-        VALUES (%(fbref_id)s, %(full_name)s, %(birth_date)s, %(nationality)s,
-                %(primary_position)s, %(position_group)s)
-        ON CONFLICT (full_name, birth_date, nationality) DO UPDATE SET
-            primary_position = EXCLUDED.primary_position,
-            position_group   = EXCLUDED.position_group,
-            updated_at       = now()
-        RETURNING player_id;
-    """
     with conn.cursor() as cur:
+        # Check if already present by source id (fbref_id / statsbomb id)
+        cur.execute("SELECT player_id FROM player_master WHERE fbref_id = %(fbref_id)s", player_row)
+        existing = cur.fetchone()
+        if existing:
+            cur.execute("""
+                UPDATE player_master SET
+                    primary_position = %(primary_position)s,
+                    position_group   = %(position_group)s,
+                    updated_at       = now()
+                WHERE player_id = %(player_id)s
+            """, {**player_row, "player_id": existing[0]})
+            return existing[0]
+
+        sql = """
+            INSERT INTO player_master
+                (fbref_id, full_name, birth_date, nationality, primary_position, position_group)
+            VALUES (%(fbref_id)s, %(full_name)s, %(birth_date)s, %(nationality)s,
+                    %(primary_position)s, %(position_group)s)
+            ON CONFLICT (full_name, birth_date, nationality) DO UPDATE SET
+                primary_position = EXCLUDED.primary_position,
+                position_group   = EXCLUDED.position_group,
+                updated_at       = now()
+            RETURNING player_id;
+        """
         cur.execute(sql, player_row)
         return cur.fetchone()[0]
 

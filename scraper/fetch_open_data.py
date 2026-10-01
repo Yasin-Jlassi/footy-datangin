@@ -19,6 +19,9 @@ DEFAULT_STATSBOMB_COMPETITIONS = [
     {"competition_id": 223, "season_id": 282, "name": "Copa America", "season": "2024"},
     {"competition_id": 9, "season_id": 281, "name": "1. Bundesliga", "season": "2023-2024"},
     {"competition_id": 43, "season_id": 106, "name": "FIFA World Cup", "season": "2022"},
+    {"competition_id": 43, "season_id": 3, "name": "FIFA World Cup", "season": "2018"},
+    {"competition_id": 16, "season_id": 4, "name": "Champions League", "season": "2018-2019"},
+    {"competition_id": 11, "season_id": 90, "name": "La Liga", "season": "2020-2021"},
 ]
 
 STATSBOMB_POSITION_MAP = {

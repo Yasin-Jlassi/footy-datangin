@@ -1,5 +1,5 @@
 import streamlit as st
-from views import search, detail, browse
+from views import search, detail, browse, compare
 
 st.set_page_config(
     page_title="Footy DataNgin",
@@ -9,10 +9,12 @@ st.set_page_config(
 
 def main():
     st.sidebar.title("Footy DataNgin")
-    view = st.sidebar.radio("Navigation", ["Search", "Detail", "Browse"])
+    view = st.sidebar.radio("Navigation", ["Search", "Compare (1v1)", "Detail", "Browse"])
     
     if view == "Search":
         search.render()
+    elif view == "Compare (1v1)":
+        compare.render()
     elif view == "Detail":
         detail.render()
     elif view == "Browse":

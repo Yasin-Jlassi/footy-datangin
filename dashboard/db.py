@@ -84,6 +84,25 @@ def get_similar_players(player_id: int, top_n: int = 10) -> pd.DataFrame:
     return pd.read_sql_query(sql, conn, params=(player_id, player_id, top_n))
 
 @st.cache_data(ttl=CACHE_TTL)
+def get_pairwise_similarity(player_id_a: int, player_id_b: int) -> float | None:
+    player_id_a, player_id_b = int(player_id_a), int(player_id_b)
+    if player_id_a > player_id_b:
+        player_id_a, player_id_b = player_id_b, player_id_a
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT similarity_score
+            FROM similarity_matrix
+            WHERE player_id_a = %s AND player_id_b = %s
+            LIMIT 1;
+            """,
+            (player_id_a, player_id_b),
+        )
+        row = cur.fetchone()
+        return float(row[0]) if row else None
+
+@st.cache_data(ttl=CACHE_TTL)
 def get_player_percentiles(player_id: int, season: str, competition_id: str) -> dict:
     player_id = int(player_id)
     player = get_player(player_id)

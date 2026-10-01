@@ -24,7 +24,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Verify DATABASE_URL
-        run: python -c "import os; dsn=os.environ.get('DATABASE_URL',''); print(f'DATABASE_URL set: {bool(dsn)}, length: {len(dsn)}')"
+        run: |
+          python -c "
+          import os
+          dsn = os.environ.get('DATABASE_URL', '')
+          print(f'DATABASE_URL set: {bool(dsn)}, length: {len(dsn)}')
+          "
 
       - name: Run scrape
         continue-on-error: true

@@ -8,12 +8,16 @@ import psycopg2
 import psycopg2.extras as pgx
 import numpy as np
 
-DB_DSN = os.environ["DATABASE_URL"]  # Supabase/Neon connection string
+def get_db_dsn():
+    dsn = os.environ.get("DATABASE_URL", "")
+    if not dsn:
+        raise ValueError("DATABASE_URL environment variable is not set")
+    return dsn
 
 # raw counting-stat columns eligible for a *_per90 derived column (extend with schema)
 PER90_COLUMNS = [
     "goals", "assists", "xg", "npxg", "xag",
-    "shots", "shots_on_target", "tackles"
+    "shots", "tackles"
 ]
 
 POSITION_GROUP_MAP = {
@@ -81,7 +85,7 @@ def run_transform_and_load(fbref_df, open_data_df=None):
     fbref_df: output of fetch_fbref_season, one row per player-season-competition.
     Dedupes on identity key, upserts player_master then player_season_stats per row.
     """
-    conn = psycopg2.connect(DB_DSN)
+    conn = psycopg2.connect(get_db_dsn())
     rows_upserted = 0
     try:
         with conn:

@@ -113,7 +113,7 @@ def run_similarity(conn) -> int:
             """
             pgx.execute_batch(cur, insert_query, records)
             total_written += len(records)
-            print(f"  {group}: {len(df)} players → {len(records)} pairs (PCA k={k})")
+            print(f"  {group}: {len(df)} players -> {len(records)} pairs (PCA k={k})")
 
     conn.commit()
     return total_written

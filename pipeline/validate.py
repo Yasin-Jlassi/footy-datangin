@@ -121,6 +121,11 @@ def run_validation(conn):
         ("Bukayo Saka", "Phil Foden"),
         ("Trent Alexander-Arnold", "Andrew Robertson"),
         ("Declan Rice", "Rodrigo Hernández"),
+        ("Jude Bellingham", "Jamal Musiala"),
+        ("Lamine Yamal", "Bukayo Saka"),
+        ("Harry Kane", "Kylian Mbappé"),
+        ("William Saliba", "Virgil van Dijk"),
+        ("Florian Wirtz", "Phil Foden"),
     ]
 
     print(f"\n{'='*50}")
@@ -141,7 +146,7 @@ def run_validation(conn):
             """, (f"%{p1}%", f"%{p2}%", f"%{p2}%", f"%{p1}%"))
             row = cur.fetchone()
             score = f"{row[0]:.3f}" if row else "Not Found"
-            print(f"  {p1} ↔ {p2}: {score}")
+            print(f"  {p1} <-> {p2}: {score}")
 
     return avg_silhouette, self_match_pass
 

@@ -21,7 +21,7 @@ stat_types = [
     "possession", "misc", "keepers", "keepersadv",
 ]
 # Minimum minutes to include a player in feature/similarity calculations
-min_minutes = 450
+min_minutes = 180
 
 [positions]
 # Canonical position groups and how raw FBref position strings map to them.

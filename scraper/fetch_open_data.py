@@ -73,6 +73,13 @@ def parse_match(match_id: int):
     players_meta = {}
     player_stats = defaultdict(lambda: defaultdict(float))
 
+    # Determine match total minutes from events (defaults to 90 or extra time duration)
+    match_duration_min = 90
+    for e in reversed(events_data):
+        if e.get("minute"):
+            match_duration_min = max(90, e["minute"])
+            break
+
     # 1. Parse Lineups for Minutes, Games Started, and Primary Positions
     for team in lineups_data:
         team_country = team.get("team_name", "International")
@@ -94,14 +101,14 @@ def parse_match(match_id: int):
                 pos_name = pos.get("position", "CM")
                 from_str = pos.get("from", "00:00")
                 to_str = pos.get("to")
-                if to_str:
-                    try:
-                        fm, fs = map(int, from_str.split(":"))
+                try:
+                    fm, fs = map(int, from_str.split(":"))
+                    if to_str:
                         tm, ts = map(int, to_str.split(":"))
-                        dur_sec = max(0, (tm * 60 + ts) - (fm * 60 + fs))
-                    except Exception:
-                        dur_sec = 0
-                else:
+                    else:
+                        tm, ts = match_duration_min, 0
+                    dur_sec = max(0, (tm * 60 + ts) - (fm * 60 + fs))
+                except Exception:
                     dur_sec = 0
 
                 played_sec += dur_sec

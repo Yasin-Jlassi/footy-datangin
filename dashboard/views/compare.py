@@ -7,7 +7,7 @@ and compare key performance metrics with category leaders highlighted.
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
-from dashboard.db import (
+from db import (
     search_players,
     get_player,
     get_player_stats,

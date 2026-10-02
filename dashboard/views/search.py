@@ -36,7 +36,15 @@ def render():
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Nationality", player['nationality'])
         col2.metric("Position", player['position_group'])
-        col3.metric("Birth Date", str(player['birth_date']))
+
+        # Calculate Age from birth date, guarding against dummy placeholder
+        dob = player.get('birth_date')
+        if dob and str(dob) != '1998-01-01':
+            from datetime import date
+            age = (date.today() - dob).days // 365
+            col3.metric("Birth Date", str(dob), delta=f"Age {age}")
+        else:
+            col3.metric("Birth Date", "N/A")
         
         # Get Latest Stats for competition/season
         stats = get_player_stats(player_id)

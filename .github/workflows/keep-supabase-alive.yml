@@ -16,15 +16,7 @@ jobs:
         run: |
           if [ -n "$DATABASE_URL" ]; then
             echo "DATABASE_URL found. Pinging Postgres database..."
-            python3 -c "
-          import psycopg2
-          import os
-          conn = psycopg2.connect(os.environ['DATABASE_URL'])
-          cur = conn.cursor()
-          cur.execute('SELECT count(*) FROM refresh_log;')
-          print('Ping successful! refresh_log count:', cur.fetchone()[0])
-          conn.close()
-          "
+            psql "$DATABASE_URL" -c "SELECT count(*) FROM refresh_log;"
           else
             echo "DATABASE_URL secret is not set!"
             exit 1

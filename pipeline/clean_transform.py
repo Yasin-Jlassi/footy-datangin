@@ -11,6 +11,15 @@ import numpy as np
 def get_db_dsn():
     dsn = os.environ.get("DATABASE_URL", "")
     if not dsn:
+        env_file = os.path.join(os.path.dirname(__file__), "..", ".env")
+        if os.path.exists(env_file):
+            with open(env_file, "r") as f:
+                for line in f:
+                    if line.strip().startswith("DATABASE_URL="):
+                        dsn = line.strip().split("=", 1)[1].strip("'\"")
+                        os.environ["DATABASE_URL"] = dsn
+                        break
+    if not dsn:
         raise ValueError("DATABASE_URL environment variable is not set")
     return dsn
 
@@ -104,11 +113,20 @@ def run_transform_and_load(fbref_df, open_data_df=None):
             for _, row in fbref_df.drop_duplicates(
                 subset=["player", "birth_year", "nation", "season", "league"]
             ).iterrows():
+                b_year = row.get("birth_year")
+                if b_year is None or (isinstance(b_year, float) and np.isnan(b_year)) or not str(b_year).strip():
+                    b_date = row.get("birth_date") or "2000-01-01"
+                else:
+                    try:
+                        b_date = row.get("birth_date") or f"{int(float(str(b_year).replace(',', ''))):04d}-01-01"
+                    except Exception:
+                        b_date = row.get("birth_date") or "2000-01-01"
+
                 player_row = {
                     "fbref_id": row["player_id"],
                     "full_name": row["player"],
-                    "birth_date": row.get("birth_date") or f"{row['birth_year']}-01-01",
-                    "nationality": row["nation"],
+                    "birth_date": b_date,
+                    "nationality": row.get("nation") or "UNK",
                     "primary_position": row.get("pos"),
                     "position_group": to_position_group(row.get("pos", "")),
                 }
@@ -116,10 +134,23 @@ def run_transform_and_load(fbref_df, open_data_df=None):
 
                 def safe_int(val):
                     if val is None or (isinstance(val, float) and np.isnan(val)): return 0
-                    return int(val)
+                    if isinstance(val, str):
+                        val = val.replace(",", "").strip()
+                        if not val: return 0
+                    try:
+                        return int(float(val))
+                    except Exception:
+                        return 0
+
                 def safe_float(val):
                     if val is None or (isinstance(val, float) and np.isnan(val)): return 0.0
-                    return float(val)
+                    if isinstance(val, str):
+                        val = val.replace(",", "").strip()
+                        if not val: return 0.0
+                    try:
+                        return float(val)
+                    except Exception:
+                        return 0.0
 
                 stats_row = {
                     "season": row["season"],

@@ -14,30 +14,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Configure Python Environment
+        run: |
+          $venvScripts = "Y:\Projects\Footy DataNgin\.venv\Scripts"
+          if (Test-Path $venvScripts) {
+            Write-Host "Configuring runner to use project virtual environment: $venvScripts"
+            $venvScripts | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            "VIRTUAL_ENV=Y:\Projects\Footy DataNgin\.venv" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } elseif (Test-Path "Y:\Python3.11.9") {
+            Write-Host "Configuring runner to use Python 3.11"
+            "Y:\Python3.11.9\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            "Y:\Python3.11.9" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+        shell: powershell
 
-      - name: Install dependencies
-        run: pip install -r requirements-pipeline.txt
+      - name: Verify Environment & Core Dependencies
+        run: |
+          python --version
+          python -c "import psycopg2, playwright, pandas, sklearn, soccerdata; print('All core libraries verified!')"
+        shell: powershell
 
       - name: Install Playwright Browsers
         run: playwright install chromium
+        shell: powershell
 
       - name: Run unit & regression tests
         run: pytest -v
+        shell: powershell
 
       - name: Verify DATABASE_URL
-        run: |
-          python -c "
-          import os
-          dsn = os.environ.get('DATABASE_URL', '')
-          print(f'DATABASE_URL set: {bool(dsn)}, length: {len(dsn)}')
-          "
+        run: python -c "import os; dsn = os.environ.get('DATABASE_URL', ''); print(f'DATABASE_URL set: {bool(dsn)}, length: {len(dsn)}')"
+        shell: powershell
 
       - name: Run scrape
         run: python scraper/run_scrape.py
+        shell: powershell
 
       - name: Run modeling
         if: always()
@@ -45,3 +56,4 @@ jobs:
           python pipeline/features.py
           python pipeline/model_similarity.py
           python pipeline/validate.py
+        shell: powershell

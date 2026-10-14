@@ -85,19 +85,29 @@ def run_similarity(conn) -> int:
         if not np.allclose(diag, 1.0, atol=1e-3):
             print(f"  WARNING: Self-similarity not ~1.0 for {group}")
 
-        player_ids = df["player_id"].values
-
+        top_n = config.get("model", {}).get("top_n_similar", 25)
+        seen_pairs = set()
         records = []
-        for i in range(len(player_ids)):
-            for j in range(i + 1, len(player_ids)):
-                id_a = int(player_ids[i])
-                id_b = int(player_ids[j])
-                score = float(sim_matrix[i, j])
+        n_players = len(player_ids)
 
-                if id_a < id_b:
+        for i in range(n_players):
+            row_sims = sim_matrix[i].copy()
+            row_sims[i] = -2.0  # exclude self-similarity
+
+            k_top = min(top_n, n_players - 1)
+            top_indices = np.argpartition(row_sims, -k_top)[-k_top:]
+            top_indices = top_indices[np.argsort(row_sims[top_indices])[::-1]]
+
+            id_i = int(player_ids[i])
+            for j in top_indices:
+                id_j = int(player_ids[j])
+                id_a = min(id_i, id_j)
+                id_b = max(id_i, id_j)
+                pair = (id_a, id_b)
+                if pair not in seen_pairs:
+                    seen_pairs.add(pair)
+                    score = float(sim_matrix[i, j])
                     records.append((group, id_a, id_b, score))
-                else:
-                    records.append((group, id_b, id_a, score))
 
         if not records:
             continue

@@ -164,9 +164,15 @@ def run_understat_ingestion(conn=None, seasons: List[str] = None) -> int:
                     key_passes = int(safe_f(p.get("key_passes")))
                     xg_buildup = safe_f(p.get("xGBuildup"))
                     xg_chain = safe_f(p.get("xGChain"))
+                    minutes = int(safe_f(p.get("time")))
+                    games = int(safe_f(p.get("games")))
+                    shots = int(safe_f(p.get("shots")))
+                    goals = int(safe_f(p.get("goals")))
+                    assists = int(safe_f(p.get("assists")))
 
                     update_tuples.append((
                         xg, npxg, xag, key_passes, xg_buildup, xg_chain,
+                        minutes, games, shots, goals, assists,
                         pid, db_season, db_league
                     ))
 
@@ -180,6 +186,12 @@ def run_understat_ingestion(conn=None, seasons: List[str] = None) -> int:
                                 key_passes = GREATEST(key_passes, %s),
                                 xg_buildup = %s,
                                 xg_chain = %s,
+                                minutes_played = GREATEST(minutes_played, %s),
+                                games_played = GREATEST(games_played, %s),
+                                shots = GREATEST(shots, %s),
+                                goals = GREATEST(goals, %s),
+                                assists = GREATEST(assists, %s),
+                                tackles = GREATEST(tackles, tackles_won),
                                 updated_at = now()
                             WHERE player_id = %s AND season = %s AND competition_id = %s;
                         """
@@ -188,7 +200,22 @@ def run_understat_ingestion(conn=None, seasons: List[str] = None) -> int:
                     conn.commit()
                     logger.info(f"Updated {len(update_tuples)} player stats for {db_league} {db_season}.")
 
-        logger.info(f"Understat ingestion complete: {total_updated} records enriched.")
+        # Recompute denormalized per90 columns in player_season_stats
+        with conn.cursor() as cur:
+            recompute_sql = """
+                UPDATE player_season_stats SET
+                    goals_per90   = ROUND((COALESCE(goals, 0)::numeric / minutes_played) * 90, 3),
+                    assists_per90 = ROUND((COALESCE(assists, 0)::numeric / minutes_played) * 90, 3),
+                    xg_per90      = ROUND((COALESCE(xg, 0)::numeric / minutes_played) * 90, 3),
+                    npxg_per90    = ROUND((COALESCE(npxg, 0)::numeric / minutes_played) * 90, 3),
+                    xag_per90     = ROUND((COALESCE(xag, 0)::numeric / minutes_played) * 90, 3),
+                    shots_per90   = ROUND((COALESCE(shots, 0)::numeric / minutes_played) * 90, 3),
+                    tackles_per90 = ROUND((COALESCE(tackles, 0)::numeric / minutes_played) * 90, 3)
+                WHERE minutes_played > 0;
+            """
+            cur.execute(recompute_sql)
+        conn.commit()
+        logger.info(f"Understat ingestion complete: {total_updated} records enriched and per90 metrics recomputed.")
         return total_updated
     finally:
         if close_conn:

@@ -107,13 +107,14 @@ def run_similarity(conn) -> int:
 
             insert_query = """
                 INSERT INTO similarity_matrix (position_group, player_id_a, player_id_b, similarity_score)
-                VALUES (%s, %s, %s, %s)
+                VALUES %s
             """
-            pgx.execute_batch(cur, insert_query, records)
+            pgx.execute_values(cur, insert_query, records, page_size=2000)
             total_written += len(records)
-            print(f"  {group}: {len(df)} players -> {len(records)} pairs (PCA k={k})")
+            print(f"  {group}: {len(df)} players -> {len(records)} pairs (PCA k={k})", flush=True)
 
-    conn.commit()
+        conn.commit()
+
     return total_written
 
 

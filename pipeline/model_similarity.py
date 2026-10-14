@@ -85,6 +85,7 @@ def run_similarity(conn) -> int:
         if not np.allclose(diag, 1.0, atol=1e-3):
             print(f"  WARNING: Self-similarity not ~1.0 for {group}")
 
+        player_ids = df["player_id"].values
         top_n = config.get("model", {}).get("top_n_similar", 25)
         seen_pairs = set()
         records = []

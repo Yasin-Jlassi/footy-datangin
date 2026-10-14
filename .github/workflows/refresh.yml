@@ -48,13 +48,5 @@ jobs:
         shell: powershell
 
       - name: Run scrape
-        run: python scraper/run_scrape.py
-        shell: powershell
-
-      - name: Run modeling
-        if: always()
-        run: |
-          python pipeline/features.py
-          python pipeline/model_similarity.py
-          python pipeline/validate.py
+        run: python scraper/run_scrape.py --skip-model
         shell: powershell

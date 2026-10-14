@@ -55,12 +55,10 @@ def run_similarity(conn) -> int:
 
         df = pd.DataFrame(rows, columns=colnames)
 
-        # Convert z-score columns to numeric
+        # Convert z-score columns to numeric and impute unrecorded columns with 0.0 (mean)
         for c in z_cols:
             if c in df.columns:
-                df[c] = pd.to_numeric(df[c], errors="coerce")
-
-        df = df.dropna(subset=z_cols)
+                df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0.0)
 
         if df.empty or len(df) < 2:
             continue
@@ -120,7 +118,12 @@ def run_similarity(conn) -> int:
 
 
 if __name__ == "__main__":
-    DB_DSN = os.environ["DATABASE_URL"]
+    import sys
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+    from pipeline.clean_transform import get_db_dsn
+    DB_DSN = get_db_dsn()
     conn = psycopg2.connect(DB_DSN)
     written = run_similarity(conn)
     print(f"[OK] {written} similarity pairs written")

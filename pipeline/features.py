@@ -73,7 +73,8 @@ def run_features(conn) -> int:
                        s.gk_saves, s.gk_shots_on_target_against,
                        s.gk_goals_against, s.gk_clean_sheets,
                        s.gk_psxg, s.gk_crosses_faced, s.gk_crosses_stopped,
-                       s.gk_def_actions_outside_pen
+                       s.gk_def_actions_outside_pen,
+                       s.xg_buildup, s.xg_chain
                 FROM player_season_stats s
                 JOIN player_master p ON p.player_id = s.player_id
                 WHERE p.position_group = %s AND s.minutes_played >= %s
@@ -127,24 +128,35 @@ def run_features(conn) -> int:
                 col = expr.split(":")[1]
                 df[feature_name] = df[col]
 
+        # Detect unrecorded columns in this dataset (e.g. passing wiped from FBref)
+        # If an entire competition-season cohort has sum == 0 for a raw metric, treat it as unrecorded (NaN)
         # Z-score and percentile within (season, competition_id)
         out_rows = []
         for (season, comp), sub_df in df.groupby(["season", "competition_id"]):
             sub_df = sub_df.copy()
             for col in derived_cols:
-                # Z-score
-                mean = sub_df[col].mean()
-                std = sub_df[col].std()
-                if pd.isna(std) or std == 0:
+                # If all values in this cohort are 0 or NaN, mark as unrecorded (NaN)
+                is_all_zero = (sub_df[col].fillna(0) == 0).all()
+                if is_all_zero:
+                    sub_df[col] = np.nan
                     sub_df[f"{col}_z"] = 0.0
+                    sub_df[f"{col}_pct"] = np.nan
+                    continue
+
+                valid_mask = sub_df[col].notna()
+                valid_vals = sub_df.loc[valid_mask, col]
+
+                if len(valid_vals) > 1 and valid_vals.std() > 0:
+                    mean = valid_vals.mean()
+                    std = valid_vals.std()
+                    sub_df[f"{col}_z"] = np.where(valid_mask, (sub_df[col] - mean) / std, 0.0)
                 else:
-                    sub_df[f"{col}_z"] = (sub_df[col] - mean) / std
+                    sub_df[f"{col}_z"] = 0.0
 
                 # Percentile
-                valid_mask = sub_df[col].notna()
                 sub_df[f"{col}_pct"] = np.nan
                 if valid_mask.sum() > 1:
-                    ranks = rankdata(sub_df.loc[valid_mask, col], method="average")
+                    ranks = rankdata(valid_vals, method="average")
                     pct = (ranks - 1) / (len(ranks) - 1) * 100
                     sub_df.loc[valid_mask, f"{col}_pct"] = pct
                 elif valid_mask.sum() == 1:
@@ -188,7 +200,12 @@ def run_features(conn) -> int:
 
 
 if __name__ == "__main__":
-    DB_DSN = os.environ["DATABASE_URL"]
+    import sys
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+    from pipeline.clean_transform import get_db_dsn
+    DB_DSN = get_db_dsn()
     conn = psycopg2.connect(DB_DSN)
     written = run_features(conn)
     print(f"[OK] {written} feature rows written")

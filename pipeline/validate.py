@@ -56,9 +56,7 @@ def run_validation(conn):
         df = pd.DataFrame(rows, columns=colnames)
         for c in z_cols:
             if c in df.columns:
-                df[c] = pd.to_numeric(df[c], errors="coerce")
-
-        df = df.dropna(subset=z_cols)
+                df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0.0)
 
         if len(df) < 3:
             continue
@@ -152,7 +150,12 @@ def run_validation(conn):
 
 
 if __name__ == "__main__":
-    DB_DSN = os.environ.get("DATABASE_URL")
+    import sys
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+    from pipeline.clean_transform import get_db_dsn
+    DB_DSN = get_db_dsn()
     if DB_DSN:
         conn = psycopg2.connect(DB_DSN)
         run_validation(conn)

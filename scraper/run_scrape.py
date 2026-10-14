@@ -23,6 +23,7 @@ from pipeline.model_similarity import run_similarity
 from pipeline.validate import run_validation
 from scraper.fetch_fbref import fetch_fbref_season
 from scraper.fetch_open_data import run_statsbomb_ingestion
+from scraper.fetch_understat import run_understat_ingestion
 
 # Load config for defaults
 try:
@@ -185,6 +186,16 @@ def main():
                 log_run_finish(conn, run_id, 0, 0, 0, 0, None, None, error_msg=str(e))
                 conn.close()
                 sys.exit(1)
+
+    # C. Understat Advanced Metrics Enrichment (xG, xA, key_passes, xGBuildup, xGChain)
+    if args.source in ("all", "fbref"):
+        print("      -> Enriching with Understat metrics (xG, xA, key passes, xGBuildup, xGChain)...")
+        try:
+            understat_enriched = run_understat_ingestion(conn, seasons=seasons)
+            print(f"        [OK] {understat_enriched} player-season records enriched with Understat metrics")
+        except Exception as e:
+            print(f"        [WARNING] Understat enrichment encountered an error: {e}")
+            logging.exception(e)
 
     print(f"\n[2/4] Total Ingestion Summary: {total_scraped} scraped, {total_upserted} upserted")
 

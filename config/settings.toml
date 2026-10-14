@@ -51,6 +51,8 @@ def_actions_outside_pen_per90 = "per90:gk_def_actions_outside_pen"
 pass_pct                    = "ratio:passes_completed:passes_attempted"
 long_pass_cmp_pct           = "ratio:passes_long_completed:passes_long_attempted"
 clean_sheet_pct             = "ratio:gk_clean_sheets:games_played"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [features.CB]
 tackles_per90               = "per90:tackles"
@@ -63,6 +65,8 @@ aerials_won_per90           = "per90:aerials_won"
 pass_pct                    = "ratio:passes_completed:passes_attempted"
 progressive_passes_per90    = "per90:progressive_passes"
 progressive_carries_per90   = "per90:progressive_carries"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [features.FB]
 tackles_per90               = "per90:tackles"
@@ -75,6 +79,8 @@ assists_per90               = "per90:assists"
 pass_pct                    = "ratio:passes_completed:passes_attempted"
 take_ons_won_per90          = "per90:take_ons_won"
 take_ons_won_pct            = "ratio:take_ons_won:take_ons_attempted"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [features.CM]
 pass_pct                    = "ratio:passes_completed:passes_attempted"
@@ -87,6 +93,8 @@ interceptions_per90         = "per90:interceptions"
 progressive_carries_per90   = "per90:progressive_carries"
 recoveries_per90            = "per90:recoveries"
 goals_per90                 = "per90:goals"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [features.W]
 goals_per90                 = "per90:goals"
@@ -99,6 +107,8 @@ key_passes_per90            = "per90:key_passes"
 take_ons_won_per90          = "per90:take_ons_won"
 take_ons_won_pct            = "ratio:take_ons_won:take_ons_attempted"
 progressive_carries_per90   = "per90:progressive_carries"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [features.ST]
 goals_per90                 = "per90:goals"
@@ -111,6 +121,8 @@ xag_per90                   = "per90:xag"
 aerials_won_per90           = "per90:aerials_won"
 aerials_won_pct             = "ratio:aerials_won:aerials_won+aerials_lost"
 touches_att_pen_area_per90  = "per90:touches_att_pen_area"
+xg_buildup_per90            = "per90:xg_buildup"
+xg_chain_per90              = "per90:xg_chain"
 
 [model]
 # PCA: retain this fraction of total explained variance

@@ -40,18 +40,21 @@ BACKFILL_SEASONS = CONFIG.get("scraper", {}).get("backfill_seasons", [])
 
 
 def get_db_dsn():
-    dsn = os.environ.get("DATABASE_URL", "")
+    dsn = os.environ.get("DATABASE_URL", "").strip()
+    if dsn.startswith("DATABASE_URL="):
+        dsn = dsn.split("=", 1)[1].strip()
+    dsn = dsn.strip("'\"")
     if not dsn:
         env_file = os.path.join(PROJECT_ROOT, ".env")
         if os.path.exists(env_file):
             with open(env_file, "r") as f:
                 for line in f:
                     if line.strip().startswith("DATABASE_URL="):
-                        dsn = line.strip().split("=", 1)[1].strip("'\"")
-                        os.environ["DATABASE_URL"] = dsn
+                        dsn = line.strip().split("=", 1)[1].strip().strip("'\"")
                         break
     if not dsn:
         raise ValueError("DATABASE_URL environment variable is not set")
+    os.environ["DATABASE_URL"] = dsn
     return dsn
 
 

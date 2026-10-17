@@ -51,7 +51,7 @@ def get_connection():
         except Exception:
             st.cache_resource.clear()
             conn = _get_cached_connection(clean_url)
-
+    conn.autocommit = True
     return conn
 
 @st.cache_data(ttl=CACHE_TTL)

@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS feature_gk (
     PRIMARY KEY (player_id, season, competition_id)
 );
 
--- ── CB  (10 features) ───────────────────────────────────────────────
+-- ── CB ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feature_cb (
     player_id        BIGINT NOT NULL REFERENCES player_master(player_id),
     season           TEXT NOT NULL,
@@ -158,16 +158,10 @@ CREATE TABLE IF NOT EXISTS feature_cb (
     clearances_per90_pct         NUMERIC,
     blocks_per90_z               NUMERIC,
     blocks_per90_pct             NUMERIC,
-    aerials_won_pct_z            NUMERIC,
-    aerials_won_pct_pct          NUMERIC,
-    aerials_won_per90_z          NUMERIC,
-    aerials_won_per90_pct        NUMERIC,
+    recoveries_per90_z           NUMERIC,
+    recoveries_per90_pct         NUMERIC,
     pass_pct_z                   NUMERIC,
     pass_pct_pct                 NUMERIC,
-    progressive_passes_per90_z   NUMERIC,
-    progressive_passes_per90_pct NUMERIC,
-    progressive_carries_per90_z  NUMERIC,
-    progressive_carries_per90_pct NUMERIC,
     xg_buildup_per90_z            NUMERIC,
     xg_buildup_per90_pct          NUMERIC,
     xg_chain_per90_z              NUMERIC,
@@ -176,7 +170,7 @@ CREATE TABLE IF NOT EXISTS feature_cb (
     PRIMARY KEY (player_id, season, competition_id)
 );
 
--- ── FB  (10 features) ───────────────────────────────────────────────
+-- ── FB ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feature_fb (
     player_id        BIGINT NOT NULL REFERENCES player_master(player_id),
     season           TEXT NOT NULL,
@@ -186,22 +180,20 @@ CREATE TABLE IF NOT EXISTS feature_fb (
     tackles_per90_pct                  NUMERIC,
     interceptions_per90_z              NUMERIC,
     interceptions_per90_pct            NUMERIC,
-    progressive_carries_per90_z        NUMERIC,
-    progressive_carries_per90_pct      NUMERIC,
-    carries_into_final_third_per90_z   NUMERIC,
-    carries_into_final_third_per90_pct NUMERIC,
-    crosses_into_pen_area_per90_z      NUMERIC,
-    crosses_into_pen_area_per90_pct    NUMERIC,
-    key_passes_per90_z                 NUMERIC,
-    key_passes_per90_pct               NUMERIC,
-    assists_per90_z                    NUMERIC,
-    assists_per90_pct                  NUMERIC,
+    clearances_per90_z                 NUMERIC,
+    clearances_per90_pct               NUMERIC,
+    recoveries_per90_z                 NUMERIC,
+    recoveries_per90_pct               NUMERIC,
     pass_pct_z                         NUMERIC,
     pass_pct_pct                       NUMERIC,
     take_ons_won_per90_z               NUMERIC,
     take_ons_won_per90_pct             NUMERIC,
     take_ons_won_pct_z                 NUMERIC,
     take_ons_won_pct_pct               NUMERIC,
+    key_passes_per90_z                 NUMERIC,
+    key_passes_per90_pct               NUMERIC,
+    assists_per90_z                    NUMERIC,
+    assists_per90_pct                  NUMERIC,
     xg_buildup_per90_z                 NUMERIC,
     xg_buildup_per90_pct               NUMERIC,
     xg_chain_per90_z                   NUMERIC,
@@ -210,7 +202,7 @@ CREATE TABLE IF NOT EXISTS feature_fb (
     PRIMARY KEY (player_id, season, competition_id)
 );
 
--- ── CM  (10 features) ───────────────────────────────────────────────
+-- ── CM ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feature_cm (
     player_id        BIGINT NOT NULL REFERENCES player_master(player_id),
     season           TEXT NOT NULL,
@@ -218,22 +210,20 @@ CREATE TABLE IF NOT EXISTS feature_cm (
 
     pass_pct_z                         NUMERIC,
     pass_pct_pct                       NUMERIC,
-    progressive_passes_per90_z         NUMERIC,
-    progressive_passes_per90_pct       NUMERIC,
-    key_passes_per90_z                 NUMERIC,
-    key_passes_per90_pct               NUMERIC,
-    passes_into_final_third_per90_z    NUMERIC,
-    passes_into_final_third_per90_pct  NUMERIC,
-    xag_per90_z                        NUMERIC,
-    xag_per90_pct                      NUMERIC,
     tackles_per90_z                    NUMERIC,
     tackles_per90_pct                  NUMERIC,
     interceptions_per90_z              NUMERIC,
     interceptions_per90_pct            NUMERIC,
-    progressive_carries_per90_z        NUMERIC,
-    progressive_carries_per90_pct      NUMERIC,
     recoveries_per90_z                 NUMERIC,
     recoveries_per90_pct               NUMERIC,
+    clearances_per90_z                 NUMERIC,
+    clearances_per90_pct               NUMERIC,
+    take_ons_won_per90_z               NUMERIC,
+    take_ons_won_per90_pct             NUMERIC,
+    key_passes_per90_z                 NUMERIC,
+    key_passes_per90_pct               NUMERIC,
+    xag_per90_z                        NUMERIC,
+    xag_per90_pct                      NUMERIC,
     goals_per90_z                      NUMERIC,
     goals_per90_pct                    NUMERIC,
     xg_buildup_per90_z                 NUMERIC,
@@ -244,7 +234,7 @@ CREATE TABLE IF NOT EXISTS feature_cm (
     PRIMARY KEY (player_id, season, competition_id)
 );
 
--- ── W   (10 features) ───────────────────────────────────────────────
+-- ── W ───────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feature_w (
     player_id        BIGINT NOT NULL REFERENCES player_master(player_id),
     season           TEXT NOT NULL,
@@ -268,8 +258,8 @@ CREATE TABLE IF NOT EXISTS feature_w (
     take_ons_won_per90_pct          NUMERIC,
     take_ons_won_pct_z              NUMERIC,
     take_ons_won_pct_pct            NUMERIC,
-    progressive_carries_per90_z     NUMERIC,
-    progressive_carries_per90_pct   NUMERIC,
+    pass_pct_z                      NUMERIC,
+    pass_pct_pct                    NUMERIC,
     xg_buildup_per90_z              NUMERIC,
     xg_buildup_per90_pct            NUMERIC,
     xg_chain_per90_z                NUMERIC,
@@ -278,7 +268,7 @@ CREATE TABLE IF NOT EXISTS feature_w (
     PRIMARY KEY (player_id, season, competition_id)
 );
 
--- ── ST  (10 features) ───────────────────────────────────────────────
+-- ── ST ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feature_st (
     player_id        BIGINT NOT NULL REFERENCES player_master(player_id),
     season           TEXT NOT NULL,
@@ -298,12 +288,12 @@ CREATE TABLE IF NOT EXISTS feature_st (
     assists_per90_pct                NUMERIC,
     xag_per90_z                      NUMERIC,
     xag_per90_pct                    NUMERIC,
-    aerials_won_per90_z              NUMERIC,
-    aerials_won_per90_pct            NUMERIC,
-    aerials_won_pct_z                NUMERIC,
-    aerials_won_pct_pct              NUMERIC,
-    touches_att_pen_area_per90_z     NUMERIC,
-    touches_att_pen_area_per90_pct   NUMERIC,
+    key_passes_per90_z               NUMERIC,
+    key_passes_per90_pct             NUMERIC,
+    take_ons_won_per90_z             NUMERIC,
+    take_ons_won_per90_pct           NUMERIC,
+    pass_pct_z                       NUMERIC,
+    pass_pct_pct                     NUMERIC,
     xg_buildup_per90_z               NUMERIC,
     xg_buildup_per90_pct             NUMERIC,
     xg_chain_per90_z                 NUMERIC,

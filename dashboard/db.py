@@ -24,7 +24,9 @@ def _clean_url(url: str) -> str:
 
 @st.cache_resource
 def _get_cached_connection(db_url: str):
-    return psycopg2.connect(db_url)
+    conn = psycopg2.connect(db_url)
+    conn.autocommit = True
+    return conn
 
 
 def get_connection():
@@ -51,7 +53,7 @@ def get_connection():
         except Exception:
             st.cache_resource.clear()
             conn = _get_cached_connection(clean_url)
-    conn.autocommit = True
+
     return conn
 
 @st.cache_data(ttl=CACHE_TTL)

@@ -24,6 +24,7 @@ from pipeline.validate import run_validation
 from scraper.fetch_fbref import fetch_fbref_season
 from scraper.fetch_open_data import run_statsbomb_ingestion
 from scraper.fetch_understat import run_understat_ingestion
+from scraper.fetch_fotmob import run_fotmob_enrichment
 
 # Load config for defaults
 try:
@@ -198,6 +199,16 @@ def main():
             print(f"        [OK] {understat_enriched} player-season records enriched with Understat metrics")
         except Exception as e:
             print(f"        [WARNING] Understat enrichment encountered an error: {e}")
+            logging.exception(e)
+
+    # D. FotMob Event Metrics Enrichment (passes, long balls, clearances, blocks, take-ons, recoveries)
+    if args.source in ("all", "fbref"):
+        print("      -> Enriching with FotMob event metrics (passes, clearances, blocks, recoveries)...")
+        try:
+            fotmob_enriched = run_fotmob_enrichment(conn, leagues=leagues, seasons=seasons)
+            print(f"        [OK] {fotmob_enriched} player-season records enriched with FotMob metrics")
+        except Exception as e:
+            print(f"        [WARNING] FotMob enrichment encountered an error: {e}")
             logging.exception(e)
 
     print(f"\n[2/4] Total Ingestion Summary: {total_scraped} scraped, {total_upserted} upserted")

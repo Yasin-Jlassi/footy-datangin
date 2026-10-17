@@ -13,7 +13,20 @@ with open(CONFIG_PATH, "rb") as f:
 
 CACHE_TTL = config.get("dashboard", {}).get("cache_ttl", 3600)
 
+def _clean_url(url: str) -> str:
+    if not url:
+        return ""
+    url = str(url).strip()
+    if url.startswith("DATABASE_URL="):
+        url = url.split("=", 1)[1].strip()
+    return url.strip("'\"")
+
+
 @st.cache_resource
+def _get_cached_connection(db_url: str):
+    return psycopg2.connect(db_url)
+
+
 def get_connection():
     # Streamlit Cloud uses st.secrets; local/CI uses env var
     db_url = None
@@ -23,7 +36,23 @@ def get_connection():
         db_url = os.environ.get("DATABASE_URL")
     if not db_url:
         raise ValueError("DATABASE_URL not found in st.secrets or environment variables")
-    return psycopg2.connect(db_url)
+
+    clean_url = _clean_url(db_url)
+    conn = _get_cached_connection(clean_url)
+    
+    # Verify connection is still alive; if closed or broken by pooler, reconnect
+    if conn.closed != 0:
+        st.cache_resource.clear()
+        conn = _get_cached_connection(clean_url)
+    else:
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+        except Exception:
+            st.cache_resource.clear()
+            conn = _get_cached_connection(clean_url)
+
+    return conn
 
 @st.cache_data(ttl=CACHE_TTL)
 def search_players(query: str) -> pd.DataFrame:

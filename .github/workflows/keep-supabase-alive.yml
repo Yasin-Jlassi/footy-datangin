@@ -2,21 +2,43 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Run every 3 days at 06:00 UTC (well within the 7-day inactivity pause window)
-    - cron: '0 6 */3 * *'
+    # Run daily at 04:00 UTC (guarantees activity well within Supabase's 7-day inactivity pause window)
+    - cron: '0 4 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase Database
+      - name: Ping and Update Database Heartbeat
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -n "$DATABASE_URL" ]; then
-            echo "DATABASE_URL found. Pinging Postgres database..."
-            psql "$DATABASE_URL" -c "SELECT count(*) FROM refresh_log;"
+            echo "DATABASE_URL found. Executing physical transaction and keepalive update..."
+            
+            # 1. Execute physical write transaction in Postgres (creates real WAL record and resets inactivity tracker)
+            psql "$DATABASE_URL" -c "
+              CREATE TABLE IF NOT EXISTS _supabase_keepalive (
+                id INT PRIMARY KEY DEFAULT 1,
+                last_ping TIMESTAMPTZ NOT NULL DEFAULT now(),
+                ping_count BIGINT DEFAULT 1
+              );
+              INSERT INTO _supabase_keepalive (id, last_ping, ping_count)
+              VALUES (1, now(), 1)
+              ON CONFLICT (id) DO UPDATE
+              SET last_ping = now(), ping_count = _supabase_keepalive.ping_count + 1;
+              SELECT id, last_ping, ping_count FROM _supabase_keepalive;
+            "
+
+            # 2. Extract project ref and ping Supabase HTTP API Gateway (Kong)
+            PROJECT_REF=$(echo "$DATABASE_URL" | sed -n 's/.*postgres\.\([^:]*\):.*/\1/p')
+            if [ -n "$PROJECT_REF" ]; then
+              echo "Pinging Supabase API Gateway for project: $PROJECT_REF"
+              curl -s -o /dev/null -w "HTTP Gateway Response: %{http_code}\n" "https://${PROJECT_REF}.supabase.co/rest/v1/" || true
+            fi
+            
+            echo "Keepalive heartbeat completed successfully."
           else
             echo "DATABASE_URL secret is not set!"
             exit 1
